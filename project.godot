@@ -1,0 +1,25 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Blipo"
+config/description="A small falling-Blip puzzle game made in Godot 4."
+run/main_scene="res://Main.tscn"
+config/icon="res://icon.png"
+config/windows_native_icon="res://Blipo.ico"
+boot_splash/bg_color=Color(0.043, 0.043, 0.063, 1)
+boot_splash/show_image=false
+config/features=PackedStringArray("4.4")
+
+[display]
+
+window/size/viewport_width=600
+window/size/viewport_height=620

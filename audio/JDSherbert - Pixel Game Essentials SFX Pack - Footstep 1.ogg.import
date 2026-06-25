@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dox5jtnah6ki3"
+path="res://.godot/imported/JDSherbert - Pixel Game Essentials SFX Pack - Footstep 1.ogg-6372a2a5239f19e437a3b73863ade3cf.oggvorbisstr"
+
+[deps]
+
+source_file="res://audio/JDSherbert - Pixel Game Essentials SFX Pack - Footstep 1.ogg"
+dest_files=["res://.godot/imported/JDSherbert - Pixel Game Essentials SFX Pack - Footstep 1.ogg-6372a2a5239f19e437a3b73863ade3cf.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

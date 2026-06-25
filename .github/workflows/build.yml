@@ -1,0 +1,77 @@
+name: Build Blipo
+
+# Runs on every push to main, and can be triggered by hand from the Actions tab.
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.4.1"          # must match the editor you build with locally
+  GODOT_REL: "4.4.1-stable"
+  GODOT_TEMPLATES: "4.4.1.stable"
+
+jobs:
+  export:
+    name: Export Windows + Web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Godot and export templates
+        run: |
+          set -e
+          BASE="https://github.com/godotengine/godot/releases/download/${GODOT_REL}"
+          wget -q "${BASE}/Godot_v${GODOT_REL}_linux.x86_64.zip" -O godot.zip
+          wget -q "${BASE}/Godot_v${GODOT_REL}_export_templates.tpz" -O templates.tpz
+          mkdir -p "$HOME/bin"
+          unzip -q godot.zip
+          mv "Godot_v${GODOT_REL}_linux.x86_64" "$HOME/bin/godot"
+          chmod +x "$HOME/bin/godot"
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATES}"
+          unzip -q templates.tpz
+          mv templates/* "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATES}/"
+
+      - name: Install Wine and rcedit (embeds Blipo.ico into the Windows .exe)
+        run: |
+          set -e
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends wine64 || sudo apt-get install -y --no-install-recommends wine
+          WINE_BIN="$(command -v wine64 || command -v wine)"
+          wget -q https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe -O "$HOME/rcedit-x64.exe"
+          # Point Godot's editor settings at rcedit + wine so the Windows export
+          # can stamp the icon onto the .exe.
+          mkdir -p "$HOME/.config/godot"
+          {
+            echo '[gd_resource type="EditorSettings" format=3]'
+            echo ''
+            echo '[resource]'
+            echo "export/windows/rcedit = \"$HOME/rcedit-x64.exe\""
+            echo "export/windows/wine = \"$WINE_BIN\""
+          } > "$HOME/.config/godot/editor_settings-4.tres"
+
+      - name: Import resources
+        # First headless pass builds the .godot import cache so the export has
+        # everything it needs. Warnings here are harmless.
+        run: godot --headless --import || true
+
+      - name: Export builds
+        run: |
+          set -e
+          mkdir -p builds/windows builds/web
+          godot --headless --export-release "Windows Desktop" builds/windows/Blipo.exe
+          godot --headless --export-release "Web" builds/web/index.html
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: blipo-windows
+          path: builds/windows
+
+      - name: Upload Web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: blipo-web
+          path: builds/web

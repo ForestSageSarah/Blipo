@@ -1,0 +1,19 @@
+# Godot 4 editor cache (regenerated automatically when the project is opened)
+.godot/
+
+# Godot editor data folders (not part of the game itself)
+export_templates/
+feature_profiles/
+script_templates/
+text_editor_themes/
+
+# Exported builds and packaged artifacts (uploaded to itch.io, not the repo)
+/builds/
+/build/
+/export/
+*.exe
+*.pck
+*.zip
+
+# Editor movie-writer recordings
+*.avi
