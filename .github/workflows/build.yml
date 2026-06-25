@@ -35,22 +35,32 @@ jobs:
           mv templates/* "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATES}/"
 
       - name: Install Wine and rcedit (embeds Blipo.ico into the Windows .exe)
+        # The icon is a nice-to-have, never a build blocker: this step is allowed
+        # to fail and every command is guarded, so the export still runs either way.
+        continue-on-error: true
         run: |
-          set -e
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends wine64 || sudo apt-get install -y --no-install-recommends wine
-          WINE_BIN="$(command -v wine64 || command -v wine)"
-          wget -q https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe -O "$HOME/rcedit-x64.exe"
-          # Point Godot's editor settings at rcedit + wine so the Windows export
-          # can stamp the icon onto the .exe.
+          sudo apt-get update || true
+          sudo apt-get install -y --no-install-recommends wine64 || sudo apt-get install -y --no-install-recommends wine || true
+          WINE_BIN="$(command -v wine64 || command -v wine || true)"
+          if [ -z "$WINE_BIN" ]; then
+            for c in /usr/bin/wine64 /usr/bin/wine /usr/lib/wine/wine64 /usr/lib/wine/wine; do
+              if [ -x "$c" ]; then WINE_BIN="$c"; break; fi
+            done
+          fi
+          echo "Wine binary: ${WINE_BIN:-NOT FOUND}"
+          wget -q https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe -O "$HOME/rcedit-x64.exe" || true
+          # Point Godot at rcedit + wine so the Windows export stamps the icon.
+          # Written under both editor-settings filenames to cover Godot 4.x layouts.
           mkdir -p "$HOME/.config/godot"
-          {
-            echo '[gd_resource type="EditorSettings" format=3]'
-            echo ''
-            echo '[resource]'
-            echo "export/windows/rcedit = \"$HOME/rcedit-x64.exe\""
-            echo "export/windows/wine = \"$WINE_BIN\""
-          } > "$HOME/.config/godot/editor_settings-4.tres"
+          for SETTINGS in editor_settings-4.tres editor_settings-4.4.tres; do
+            {
+              echo '[gd_resource type="EditorSettings" format=3]'
+              echo ''
+              echo '[resource]'
+              echo "export/windows/rcedit = \"$HOME/rcedit-x64.exe\""
+              echo "export/windows/wine = \"${WINE_BIN}\""
+            } > "$HOME/.config/godot/$SETTINGS"
+          done
 
       - name: Import resources
         # First headless pass builds the .godot import cache so the export has
