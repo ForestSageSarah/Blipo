@@ -23,8 +23,8 @@ Artist page: https://opengameart.org/users/pudgyplatypus
 
 Crusenho (Agus Hennihuno) - **Complete UI Essential Pack**
 Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+
 https://crusenho.itch.io | https://creativecommons.org/licenses/by/4.0/
-Changes made: sprites were copied into the project and referenced at runtime.
 
 ## Fonts
 

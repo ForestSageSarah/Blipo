@@ -2,7 +2,7 @@
 
 A small, cozy falling-Blip puzzle game made in Godot 4. Line up four or more Blips of the same color to clear them, wipe out every target Blip, and try not to let the box fill to the top.
 
-Play it in your browser on itch.io: _add your itch.io link here_
+Play it in your browser on itch.io: https://forestsagesarah.itch.io/
 
 ## Features
 
@@ -38,7 +38,7 @@ Target Blips are seeded into the lower box at the start. Drop pairs and line up 
 2. Open `project.godot` in Godot.
 3. Press F5 to play, or use Project, Export with the "Windows Desktop" and "Web" presets to build.
 
-Pushes to `main` also build both the Windows and Web versions automatically through GitHub Actions (see `.github/workflows/build.yml`); the builds appear as downloadable artifacts on each run.
+Pushes to `main` also automatically build both the Windows and Web versions via GitHub Actions (see `.github/workflows/build.yml`); the builds appear as downloadable artifacts on each run.
 
 ## Credits and license
 
