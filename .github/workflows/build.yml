@@ -1,9 +1,11 @@
 name: Build Blipo
 
-# Runs on every push to main, and can be triggered by hand from the Actions tab.
+# Builds on every push to main (downloadable as run artifacts), and publishes a
+# GitHub Release with the builds attached whenever you push a version tag (v*).
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   workflow_dispatch:
 
 env:
@@ -15,6 +17,8 @@ jobs:
   export:
     name: Export Windows + Web
     runs-on: ubuntu-latest
+    permissions:
+      contents: write              # needed to publish a Release on tag pushes
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,8 +53,6 @@ jobs:
           fi
           echo "Wine binary: ${WINE_BIN:-NOT FOUND}"
           wget -q https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe -O "$HOME/rcedit-x64.exe" || true
-          # Point Godot at rcedit + wine so the Windows export stamps the icon.
-          # Written under both editor-settings filenames to cover Godot 4.x layouts.
           mkdir -p "$HOME/.config/godot"
           for SETTINGS in editor_settings-4.tres editor_settings-4.4.tres; do
             {
@@ -85,3 +87,21 @@ jobs:
         with:
           name: blipo-web
           path: builds/web
+
+      # ----- Release (only when a v* tag is pushed) -----
+      - name: Package builds for release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          set -e
+          ( cd builds/windows && zip -q -r "$GITHUB_WORKSPACE/Blipo-Windows.zip" . )
+          ( cd builds/web && zip -q -r "$GITHUB_WORKSPACE/Blipo-Web.zip" . )
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Blipo ${{ github.ref_name }}"
+          generate_release_notes: true
+          files: |
+            Blipo-Windows.zip
+            Blipo-Web.zip
